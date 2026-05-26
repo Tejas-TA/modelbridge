@@ -44,6 +44,8 @@ dev = [
 [project.urls]
 Homepage = "https://github.com/Tejas-TA/predikit"
 Repository = "https://github.com/Tejas-TA/predikit"
+"Bug Tracker" = "https://github.com/Tejas-TA/predikit/issues"
+Changelog = "https://github.com/Tejas-TA/predikit/releases"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/predikit"]
