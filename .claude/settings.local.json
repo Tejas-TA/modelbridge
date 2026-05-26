@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(python -m pytest tests/ -v --tb=short --cov=src/predikit --cov-report=term-missing)"
+    ]
+  }
+}

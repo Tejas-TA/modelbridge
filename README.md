@@ -20,6 +20,12 @@ pip install predikit[xgboost]
 
 # With LangChain support
 pip install predikit[langchain]
+
+# With MLflow Model Registry support
+pip install predikit[mlflow]
+
+# With Snowflake Model Registry support
+pip install predikit[snowflake]
 ```
 
 ## 30-second example
@@ -244,6 +250,50 @@ registry = ToolRegistry(tools=[price_tool], ensembles=[ensemble])
 registry.to_openai()  # includes both tools and ensembles
 ```
 
+### MLflow Model Registry loader
+
+Load a registered MLflow model directly — no manual `.load_model()` call:
+
+```python
+from predikit.loaders import from_mlflow
+
+tool = from_mlflow(
+    model_uri="models:/churn-classifier/Production",
+    name="churn_risk",
+    description="Predict member churn probability.",
+    input_schema=MemberInput,
+    output_name="churn_probability",
+    output_description="Churn probability 0–1",
+)
+
+tool.invoke({"tenure_months": 24, "trips_last_year": 2, "avg_spend": 500})
+# → {"churn_probability": 0.73}
+```
+
+The loader auto-detects `classes_` and `feature_names_in_` from the underlying sklearn model, so confidence routing and ensemble work unchanged. Requires `pip install predikit[mlflow]`.
+
+### Snowflake Model Registry loader
+
+Load a model registered in the Snowflake Model Registry via the Snowpark ML Python library:
+
+```python
+from predikit.loaders import from_snowflake
+
+tool = from_snowflake(
+    session=snowpark_session,
+    model_name="VACATION_CHURN",
+    model_version="V3",
+    name="churn_risk",
+    description="Vacation ownership churn classifier.",
+    input_schema=MemberInput,
+    output_name="churn_probability",
+    output_description="Churn probability 0–1",
+    output_method="predict",   # method to call on the Snowflake model object
+)
+```
+
+Pass `output_method="predict_proba"` or any other method your Snowflake model exposes. The returned `ModelTool` is identical to one built directly — all exporters, confidence routing, and ensemble strategies work as-is. Requires `pip install predikit[snowflake]`.
+
 ### Orlando real estate demo
 
 See [`examples/03_orlando_real_estate.py`](examples/03_orlando_real_estate.py) for a full end-to-end walkthrough: synthetic dataset → XGBoost training → `ModelTool` → registry → OpenAI schema → prediction.
@@ -252,9 +302,10 @@ See [`examples/03_orlando_real_estate.py`](examples/03_orlando_real_estate.py) f
 
 Planned for later releases:
 
-- MLflow / Snowflake Model Registry integration
 - HuggingFace / PyTorch / TensorFlow support
 - Async invocation
+- Weighted ensemble strategies
+- CLI (`predikit inspect model.pkl`)
 
 ## License
 
