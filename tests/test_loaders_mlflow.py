@@ -36,10 +36,10 @@ class RegressionInput(BaseModel):
 # ---------------------------------------------------------------------------
 
 def _log_sklearn_model(model, tmp_path):
-    """Log a model to a local MLflow run and return its URI."""
     import mlflow.sklearn
-    tracking_uri = tmp_path.as_uri()
-    mlflow.set_tracking_uri(tracking_uri)
+    db_uri = f"sqlite:///{tmp_path}/mlflow.db"
+    mlflow.set_tracking_uri(db_uri)
+    mlflow.set_experiment("predikit-test")
     with mlflow.start_run() as run:
         mlflow.sklearn.log_model(model, artifact_path="model")
         run_id = run.info.run_id
