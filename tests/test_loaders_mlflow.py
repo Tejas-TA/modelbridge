@@ -1,7 +1,6 @@
 """Integration tests for from_mlflow: logs a real model, loads, invokes."""
 import os
 import tempfile
-
 import numpy as np
 import pytest
 from pydantic import BaseModel, Field
@@ -37,8 +36,7 @@ class RegressionInput(BaseModel):
 
 def _log_sklearn_model(model, tmp_path):
     import mlflow.sklearn
-    db_uri = f"sqlite:///{tmp_path}/mlflow.db"
-    mlflow.set_tracking_uri(db_uri)
+    mlflow.set_tracking_uri(f"sqlite:///{tmp_path}/mlflow.db")
     mlflow.set_experiment("predikit-test")
     with mlflow.start_run() as run:
         mlflow.sklearn.log_model(model, artifact_path="model")
