@@ -86,7 +86,7 @@ class ModelTool:
 
     async def ainvoke(self, input_dict: dict) -> dict:
         """Async version of invoke(); runs the blocking call in a thread pool."""
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, self.invoke, input_dict)
 
     def to_openai(self) -> dict:

@@ -1,3 +1,4 @@
+import asyncio
 import pytest
 from pydantic import BaseModel
 from sklearn.datasets import load_iris
@@ -88,6 +89,26 @@ def test_to_callable(clf_tools):
     assert callable(fn)
     result = fn(**SAMPLE)
     assert "species" in result
+
+
+def test_ainvoke_returns_same_as_invoke_collect():
+    X, y = load_iris(return_X_y=True)
+    clf = LogisticRegression(max_iter=200).fit(X, y)
+    reg = LinearRegression().fit(X, y.astype(float))
+    tool_a = ModelTool(model=clf, name="a", description="", input_schema=IrisInput, output_name="species", output_description="")
+    tool_b = ModelTool(model=reg, name="b", description="", input_schema=IrisInput, output_name="score", output_description="")
+    ens = ModelEnsemble(tools=[tool_a, tool_b], name="e", description="", strategy="collect")
+    assert asyncio.run(ens.ainvoke(SAMPLE)) == ens.invoke(SAMPLE)
+
+
+def test_ainvoke_returns_same_as_invoke_vote(clf_tools):
+    ens = ModelEnsemble(tools=clf_tools, name="e", description="", strategy="vote")
+    assert asyncio.run(ens.ainvoke(SAMPLE)) == ens.invoke(SAMPLE)
+
+
+def test_ainvoke_returns_same_as_invoke_mean(reg_tools):
+    ens = ModelEnsemble(tools=reg_tools, name="e", description="", strategy="mean")
+    assert asyncio.run(ens.ainvoke(SAMPLE)) == ens.invoke(SAMPLE)
 
 
 def test_registry_includes_ensembles(clf_tools):

@@ -64,6 +64,7 @@ class ModelEnsemble:
         weights = self.weights if self.weights is not None else [1.0] * len(self.tools)
 
         if self.strategy == "mean":
+            # Equal-weight average regardless of self.weights; use weighted_mean for non-uniform weights.
             numeric = [float(v) for v in values]
             return {output_name: sum(numeric) / len(numeric)}
 

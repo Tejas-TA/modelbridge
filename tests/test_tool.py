@@ -1,3 +1,4 @@
+import asyncio
 import numpy as np
 import pytest
 from pydantic import BaseModel
@@ -82,3 +83,16 @@ def test_invoke_bool_string_coerced_through_invoke():
     assert tool.invoke({"value": 3.0, "active": "yes"})["result"] in [0, 1]
     assert tool.invoke({"value": 1.0, "active": "false"})["result"] in [0, 1]
     assert tool.invoke({"value": 3.0, "active": "on"})["result"] in [0, 1]
+
+
+SAMPLE = {"sepal_length": 5.1, "sepal_width": 3.5, "petal_length": 1.4, "petal_width": 0.2}
+
+
+def test_ainvoke_returns_same_as_invoke(iris_tool):
+    result = asyncio.run(iris_tool.ainvoke(SAMPLE))
+    assert result == iris_tool.invoke(SAMPLE)
+
+
+def test_ainvoke_invalid_input_raises(iris_tool):
+    with pytest.raises(ValueError):
+        asyncio.run(iris_tool.ainvoke({"sepal_length": "not_a_number"}))
